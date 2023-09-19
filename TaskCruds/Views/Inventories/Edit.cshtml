@@ -1,0 +1,69 @@
+﻿@model TaskCruds.Models.Inventory
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Inventory</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="ItemCode" class="control-label"></label>
+                <input asp-for="ItemCode" class="form-control" />
+                <span asp-validation-for="ItemCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ItemName" class="control-label"></label>
+                <input asp-for="ItemName" class="form-control" />
+                <span asp-validation-for="ItemName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ItemUnit" class="control-label"></label>
+                <input asp-for="ItemUnit" class="form-control" />
+                <span asp-validation-for="ItemUnit" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ItemBalanceInSystem" class="control-label"></label>
+                <input asp-for="ItemBalanceInSystem" class="form-control" />
+                <span asp-validation-for="ItemBalanceInSystem" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ItemBalanceInStore" class="control-label"></label>
+                <input asp-for="ItemBalanceInStore" class="form-control" />
+                <span asp-validation-for="ItemBalanceInStore" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DamageMaterial" class="control-label"></label>
+                <input asp-for="DamageMaterial" class="form-control" />
+                <span asp-validation-for="DamageMaterial" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpiredMaterial" class="control-label"></label>
+                <input asp-for="ExpiredMaterial" class="form-control" />
+                <span asp-validation-for="ExpiredMaterial" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NetMaterial" class="control-label"></label>
+                <input asp-for="NetMaterial" class="form-control" />
+                <span asp-validation-for="NetMaterial" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
