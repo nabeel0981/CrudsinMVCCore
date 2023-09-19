@@ -22,9 +22,20 @@ namespace TaskCruds.Controllers
         // GET: Inventories
         public async Task<IActionResult> Index()
         {
-              return _context.Inventories != null ? 
-                          View(await _context.Inventories.ToListAsync()) :
-                          Problem("Entity set 'Inventory_Db.Inventories'  is null.");
+            if (_context.Inventories == null)
+            {
+                return Problem("Entity set 'Inventory_Db.Inventories' is null.");
+            }
+
+            var inventories = await _context.Inventories.ToListAsync();
+
+            // Calculate NetMaterial for each item before displaying
+            foreach (var inventory in inventories)
+            {
+                inventory.NetMaterial = inventory.ItemBalanceInSystem - inventory.DamageMaterial - inventory.ExpiredMaterial;
+            }
+
+            return View(inventories);
         }
 
         // GET: Inventories/Details/5
@@ -52,21 +63,22 @@ namespace TaskCruds.Controllers
         }
 
         // POST: Inventories/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,ItemCode,ItemName,ItemUnit,ItemBalanceInSystem,ItemBalanceInStore,DamageMaterial,ExpiredMaterial,NetMaterial")] Inventory inventory)
         {
             if (ModelState.IsValid)
             {
+                // Calculate NetMaterial and update ItemBalanceInStore and ItemBalanceInSystem
+                inventory.NetMaterial = inventory.ItemBalanceInSystem - inventory.DamageMaterial - inventory.ExpiredMaterial;
+                inventory.ItemBalanceInStore = inventory.NetMaterial;
+
                 _context.Add(inventory);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(inventory);
         }
-
         // GET: Inventories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -86,6 +98,7 @@ namespace TaskCruds.Controllers
         // POST: Inventories/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Inventories/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,ItemCode,ItemName,ItemUnit,ItemBalanceInSystem,ItemBalanceInStore,DamageMaterial,ExpiredMaterial,NetMaterial")] Inventory inventory)
@@ -99,6 +112,10 @@ namespace TaskCruds.Controllers
             {
                 try
                 {
+                    // Calculate NetMaterial and update ItemBalanceInStore and ItemBalanceInSystem
+                    inventory.NetMaterial = inventory.ItemBalanceInSystem - inventory.DamageMaterial - inventory.ExpiredMaterial;
+                    inventory.ItemBalanceInStore = inventory.NetMaterial;
+
                     _context.Update(inventory);
                     await _context.SaveChangesAsync();
                 }
@@ -145,12 +162,15 @@ namespace TaskCruds.Controllers
             {
                 return Problem("Entity set 'Inventory_Db.Inventories'  is null.");
             }
+
             var inventory = await _context.Inventories.FindAsync(id);
             if (inventory != null)
             {
-                _context.Inventories.Remove(inventory);
+                // Soft delete by reducing ItemBalanceInStore and updating NetMaterial
+                inventory.ItemBalanceInStore -= 1; // Assuming you're removing one item
+                inventory.NetMaterial = inventory.ItemBalanceInSystem - inventory.DamageMaterial - inventory.ExpiredMaterial;
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
